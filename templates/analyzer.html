@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Disease Analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='style.css')}}">
+
+
+</head>
+
+<body>
+    <h1>Skin Disease Analyzer</h1>
+
+    <form id="uploadForm" action="/analyze" method="post" enctype="multipart/form-data">
+        <label for="fileInput">Choose image to upload</label>
+        <div class="image-preview-container">
+            <input type="file" name="photo" id="fileInput" accept="image/*" onchange="previewImage(this)" required>
+            <br>
+            <button type="button" class="btn" onclick="document.getElementById('fileInput').click()">Choose
+                File</button>
+            <div id="imagePreviewContainer">
+                <img id="imagePreview" alt="Image Preview">
+            </div>
+        </div>
+        <div class="analyze-section">
+            <button id="analyzeBtn" class="btn" type="button" onclick="analyzeImage()">Analyze</button>
+            <div class="loading" id="loadingDiv">
+                <img src="loading.gif" alt="Loading...">
+            </div>
+        </div>
+    </form>
+
+    <div id="resultContainer" class="result-container">
+        <!-- This section will display the predicted result -->
+    </div>
+
+    <script>
+        function analyzeImage() {
+            var form = document.getElementById('uploadForm');
+            var formData = new FormData(form);
+
+            var analyzeBtn = document.getElementById('analyzeBtn');
+            var loadingDiv = document.getElementById('loadingDiv');
+            var resultContainer = document.getElementById('resultContainer');
+
+            analyzeBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            resultContainer.innerHTML = ''; // Clear previous result if any
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                    resultContainer.innerHTML = data.result;
+                })
+                .catch(error => {
+                    loadingDiv.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                    console.error('Error:', error);
+                });
+        }
+
+        function previewImage(input) {
+            var fileInput = input;
+            var imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            var imagePreview = document.getElementById('imagePreview');
+
+            if (fileInput.files && fileInput.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                    document.querySelector('.result-container').style.display = 'flex';
+                };
+
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+    </script>
+</body>
+
+</html>
