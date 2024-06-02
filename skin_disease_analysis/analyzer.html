@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Disease Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url('your-background-image.jpg'); /* Replace 'your-background-image.jpg' with the actual path to your image */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            margin-bottom: 20px;
+            display: none; /* Hide the default file input */
+        }
+
+        .file-choose-button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #imagePreviewContainer {
+            border: 1px solid #ddd;
+            padding: 10px;
+            display: none;
+            margin: 0 auto; /* Center the image preview */
+            width: 50%; /* Adjust the width as needed */
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 200px;
+        }
+
+        .analyze-section {
+            margin-top: 20px;
+        }
+
+        .detected-disease-box {
+            border: 1px solid #333; /* Dark border */
+            padding: 10px;
+            width: 45%; /* Adjust the width as needed */
+            margin: 0 auto; /* Center the detected disease box */
+            display: flex;
+        }
+
+        .output-box {
+            border: 1px solid #333; /* Dark border */
+            padding: 10px;
+            width: 70%; /* Adjust the width as needed */
+        }
+
+        /* New styles */
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .loading img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skin Disease Analyzer</h1>
+
+    <form id="uploadForm" action="/analyze" method="post" enctype="multipart/form-data">
+        <label for="fileInput">Choose file to upload:</label>
+        <div class="image-preview-container">
+            <input type="file" name="photo" id="fileInput" accept="image/*" onchange="previewImage(this)" required>
+            <br>
+            <button type="button" class="file-choose-button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+            <div id="imagePreviewContainer">
+                <img id="imagePreview" alt="Image Preview">
+            </div>
+        </div>
+        <div class="analyze-section">
+            <button id="analyzeBtn" type="button" onclick="analyzeImage()">Analyze</button>
+            <div class="loading" id="loadingDiv">
+                <img src="loading.gif" alt="Loading...">
+            </div>
+        </div>
+    </form>
+
+    <div id="resultContainer" class="result-container">
+        <!-- This section will display the predicted result -->
+    </div>
+
+    <script>
+        function analyzeImage() {
+            var form = document.getElementById('uploadForm');
+            var formData = new FormData(form);
+
+            var analyzeBtn = document.getElementById('analyzeBtn');
+            var loadingDiv = document.getElementById('loadingDiv');
+            var resultContainer = document.getElementById('resultContainer');
+
+            analyzeBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            resultContainer.innerHTML = ''; // Clear previous result if any
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                analyzeBtn.disabled = false;
+                resultContainer.innerHTML = data.result;
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                analyzeBtn.disabled = false;
+                console.error('Error:', error);
+            });
+        }
+
+        function previewImage(input) {
+            var fileInput = input;
+            var imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            var imagePreview = document.getElementById('imagePreview');
+
+            if (fileInput.files && fileInput.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                    document.querySelector('.result-container').style.display = 'flex';
+                };
+
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>
