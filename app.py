@@ -26,6 +26,7 @@ def predict_skin_disease(image_path, model, label_encoder):
     predictions = model.predict(processed_img)
     predicted_class_index = np.argmax(predictions)
     predicted_class = label_encoder.classes_[predicted_class_index]
+
     return predicted_class
 
 @app.route('/')
